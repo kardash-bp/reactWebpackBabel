@@ -1,7 +1,24 @@
-import React from 'react'
+import Axios from 'axios'
+import React, { useState } from 'react'
 import Page from './Page'
 
 const HomeGuest = () => {
+  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  async function handleSubmit(e) {
+    e.preventDefault()
+    try {
+      await Axios.post('http://localhost:8080/register', {
+        username,
+        email,
+        password,
+      })
+      console.log('User was successfully created.')
+    } catch (err) {
+      console.log(err.message)
+    }
+  }
   return (
     <Page wide={true} title='Welcome!'>
       <div className='row align-items-center'>
@@ -15,7 +32,7 @@ const HomeGuest = () => {
           </p>
         </div>
         <div className='col-lg-5 pl-lg-5 pb-3 py-lg-5'>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className='form-group'>
               <label htmlFor='username-register' className='text-muted mb-1'>
                 <small>Username</small>
@@ -27,6 +44,7 @@ const HomeGuest = () => {
                 type='text'
                 placeholder='Pick a username'
                 autoComplete='off'
+                onChange={(e) => setUsername(e.target.value)}
               />
             </div>
             <div className='form-group'>
@@ -40,6 +58,7 @@ const HomeGuest = () => {
                 type='text'
                 placeholder='you@example.com'
                 autoComplete='off'
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div className='form-group'>
@@ -52,6 +71,7 @@ const HomeGuest = () => {
                 className='form-control'
                 type='password'
                 placeholder='Create a password'
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
             <button
