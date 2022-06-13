@@ -1,11 +1,13 @@
 import Axios from 'axios'
 import React, { useState } from 'react'
+import { useOutletContext } from 'react-router-dom'
 import Page from './Page'
 
-const HomeGuest = () => {
+function HomeGuest() {
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const { loggedIn } = useOutletContext()
   async function handleSubmit(e) {
     e.preventDefault()
     try {
@@ -19,7 +21,7 @@ const HomeGuest = () => {
       console.log(err.message)
     }
   }
-  return (
+  return !loggedIn ? (
     <Page wide={true} title='Welcome!'>
       <div className='row align-items-center'>
         <div className='col-lg-7 py-3 py-md-5'>
@@ -83,6 +85,19 @@ const HomeGuest = () => {
           </form>
         </div>
       </div>
+    </Page>
+  ) : (
+    <Page title='Your Feed'>
+      <h2 className='text-center'>
+        Hello <strong>{localStorage.getItem('complexAppUsername')}</strong>,
+        your feed is empty.
+      </h2>
+      <p className='lead text-muted text-center'>
+        Your feed displays the latest posts from the people you follow. If you
+        don&rsquo;t have any friends to follow that&rsquo;s okay; you can use
+        the &ldquo;Search&rdquo; feature in the top menu bar to find content
+        written by people with similar interests and then follow them.
+      </p>
     </Page>
   )
 }

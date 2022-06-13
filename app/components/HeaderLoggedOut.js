@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Axios from 'axios'
 
-const HeaderLoggedOut = () => {
+const HeaderLoggedOut = ({ logged }) => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   async function handleSubmit(e) {
@@ -12,7 +12,10 @@ const HeaderLoggedOut = () => {
         password,
       })
       if (response.data) {
-        console.log(response.data)
+        localStorage.setItem('complexAppToken', response.data.token)
+        localStorage.setItem('complexAppUsername', response.data.username)
+        localStorage.setItem('complexAppAvatar', response.data.avatar)
+        logged(true)
       } else {
         console.log('Incorrect data')
       }
