@@ -1,1 +1,0 @@
-mongodb+srv://kihot:React1501@cluster0.djfccjq.mongodb.net/ReactCourse?retryWrites=true&w=majority
