@@ -1,11 +1,14 @@
 import React from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 
 const HeaderLoggedIn = ({ logged }) => {
+  const navigate = useNavigate()
   const handleLogout = () => {
     logged(false)
     localStorage.removeItem('complexAppToken')
     localStorage.removeItem('complexAppUsername')
     localStorage.removeItem('complexAppAvatar')
+    navigate('/')
   }
   return (
     <div className='flex-row my-3 my-md-0'>
@@ -22,9 +25,9 @@ const HeaderLoggedIn = ({ logged }) => {
           src={localStorage.getItem('complexAppAvatar')}
         />
       </a>
-      <a className='btn btn-sm btn-success mr-2' href='/create-post'>
+      <Link className='btn btn-sm btn-success mr-2' to='/create-post'>
         Create Post
-      </a>
+      </Link>
       <button onClick={handleLogout} className='btn btn-sm btn-secondary'>
         Sign Out
       </button>
