@@ -1,13 +1,17 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { AppContext } from '../App'
 
-const HeaderLoggedIn = ({ logged }) => {
+const HeaderLoggedIn = () => {
+  const { state, dispatch } = useContext(AppContext)
+
   const navigate = useNavigate()
   const handleLogout = () => {
-    logged(false)
-    localStorage.removeItem('complexAppToken')
-    localStorage.removeItem('complexAppUsername')
-    localStorage.removeItem('complexAppAvatar')
+    dispatch({ type: 'logout' })
+    dispatch({
+      type: 'addFlashMsg',
+      payload: 'You have successfully been logged out.',
+    })
     navigate('/')
   }
   return (
@@ -20,10 +24,7 @@ const HeaderLoggedIn = ({ logged }) => {
         <span className='chat-count-badge text-white'> </span>
       </span>
       <a href='#' className='mr-2'>
-        <img
-          className='small-header-avatar'
-          src={localStorage.getItem('complexAppAvatar')}
-        />
+        <img className='small-header-avatar' src={state.user.avatar} />
       </a>
       <Link className='btn btn-sm btn-success mr-2' to='/create-post'>
         Create Post

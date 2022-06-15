@@ -1,13 +1,14 @@
 import Axios from 'axios'
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import { useOutletContext } from 'react-router-dom'
+import { AppContext } from '../App'
 import Page from './Page'
 
 function HomeGuest() {
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const { loggedIn } = useOutletContext()
+  const { state } = useContext(AppContext)
   async function handleSubmit(e) {
     e.preventDefault()
     try {
@@ -21,7 +22,7 @@ function HomeGuest() {
       console.log(err.message)
     }
   }
-  return !loggedIn ? (
+  return !state.loggedIn ? (
     <Page wide={true} title='Welcome!'>
       <div className='row align-items-center'>
         <div className='col-lg-7 py-3 py-md-5'>
@@ -89,8 +90,7 @@ function HomeGuest() {
   ) : (
     <Page title='Your Feed'>
       <h2 className='text-center'>
-        Hello <strong>{localStorage.getItem('complexAppUsername')}</strong>,
-        your feed is empty.
+        Hello <strong>{state.user.username}</strong>, your feed is empty.
       </h2>
       <p className='lead text-muted text-center'>
         Your feed displays the latest posts from the people you follow. If you

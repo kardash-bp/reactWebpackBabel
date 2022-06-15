@@ -1,9 +1,12 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import Axios from 'axios'
+import { AppContext } from '../App'
 
-const HeaderLoggedOut = ({ logged }) => {
+const HeaderLoggedOut = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const { dispatch } = useContext(AppContext)
+
   async function handleSubmit(e) {
     e.preventDefault()
     try {
@@ -12,10 +15,11 @@ const HeaderLoggedOut = ({ logged }) => {
         password,
       })
       if (response.data) {
-        localStorage.setItem('complexAppToken', response.data.token)
-        localStorage.setItem('complexAppUsername', response.data.username)
-        localStorage.setItem('complexAppAvatar', response.data.avatar)
-        logged(true)
+        dispatch({ type: 'login', payload: response.data })
+        dispatch({
+          type: 'addFlashMsg',
+          payload: 'You are successfully logged in.',
+        })
       } else {
         console.log('Incorrect data')
       }

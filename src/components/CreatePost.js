@@ -1,9 +1,12 @@
 import axios from 'axios'
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { AppContext } from '../App'
 import Page from './Page'
 
 const CreatePost = () => {
+  const { state, dispatch } = useContext(AppContext)
+
   const [title, setTitle] = useState()
   const [body, setBody] = useState()
   const navigate = useNavigate()
@@ -13,7 +16,11 @@ const CreatePost = () => {
       const response = await axios.post('/create-post', {
         title,
         body,
-        token: localStorage.getItem('complexAppToken'),
+        token: state.user.token,
+      })
+      dispatch({
+        type: 'addFlashMsg',
+        payload: 'Congrats,you successfully created a post.',
       })
       navigate(`/${response.data}`)
     } catch (err) {
