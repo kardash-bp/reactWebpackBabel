@@ -45,7 +45,6 @@ const App = () => {
       localStorage.removeItem('complexAppAvatar')
     }
   }, [state.loggedIn])
-  console.log(state)
   return (
     <AppContext.Provider value={value}>
       <FlashMsg />

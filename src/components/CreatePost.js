@@ -22,7 +22,7 @@ const CreatePost = () => {
         type: 'addFlashMsg',
         payload: 'Congrats,you successfully created a post.',
       })
-      navigate(`/${response.data}`)
+      navigate(`/posts/${response.data}`)
     } catch (err) {
       console.log(err.message)
     }

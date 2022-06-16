@@ -5,10 +5,9 @@ const FlashMsg = () => {
   const {
     state: { flashMessages },
   } = useContext(AppContext)
-  console.log(flashMessages)
   return (
     <div className='floating-alerts'>
-      {/* {flashMessages.map((msg, index) => {
+      {flashMessages.map((msg, index) => {
         return (
           <div
             key={index}
@@ -17,7 +16,7 @@ const FlashMsg = () => {
             {msg}
           </div>
         )
-      })} */}
+      })}
     </div>
   )
 }
