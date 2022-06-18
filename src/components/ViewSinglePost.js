@@ -1,15 +1,19 @@
 import axios from 'axios'
-import React, { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import React, { useState, useEffect, useContext } from 'react'
+import ReactMarkdown from 'react-markdown'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import ReactTooltip from 'react-tooltip'
+import { AppContext } from '../App'
 import { formatDate } from '../utils/formatDate'
 import LoadingDots from './LoadingDots'
 import Page from './Page'
 
 const ViewSinglePost = () => {
+  const navigate = useNavigate()
+  const { state, dispatch } = useContext(AppContext)
   const [isLoading, setIsLoading] = useState(true)
   const [post, setPost] = useState()
   const { postId } = useParams()
-  console.log(postId)
   useEffect(() => {
     const ct = axios.CancelToken.source()
     ;(async () => {
@@ -20,32 +24,78 @@ const ViewSinglePost = () => {
         setPost(response.data)
         setIsLoading(false)
       } catch (err) {
-        console.log(err.message)
+        if (axios.isCancel(err)) {
+          console.log(err.message)
+        }
+        console.error(err.message)
       }
     })()
     return () => {
       ct.cancel()
     }
   }, [])
-  if (isLoading)
+  if (isLoading) {
     return (
       <Page title='...'>
         <LoadingDots />
       </Page>
     )
-  console.log(post)
+  }
+  const isOwner = () => {
+    if (state.loggedIn) {
+      return state.user.username === post.author.username
+    }
+    return false
+  }
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm('Are you sure?')
+    if (confirmDelete) {
+      try {
+        const res = await axios.delete(`/post/${postId}`, {
+          data: { token: state.user.token },
+        })
+        if (res.data === 'Success') {
+          dispatch({
+            type: 'addFlashMsg',
+            payload: 'Post was successfully deleted.',
+          })
+          navigate(`/profile/${state.user.username}`)
+        }
+      } catch (err) {
+        console.log(err.message)
+      }
+    }
+  }
   return (
     <Page title={post.title}>
       <div className='d-flex justify-content-between'>
         <h2>{post.title}</h2>
-        <span className='pt-2'>
-          <a href='#' className='text-primary mr-2' title='Edit'>
-            <i className='fas fa-edit'></i>
-          </a>
-          <a className='delete-post-button text-danger' title='Delete'>
-            <i className='fas fa-trash'></i>
-          </a>
-        </span>
+        {isOwner() && (
+          <span className='pt-2'>
+            <button
+              data-tip='Edit'
+              data-for='edit'
+              data-background-color='#007BFF'
+              className='btn btn-primary mr-2'
+              onClick={() =>
+                navigate('/create-post', { state: { post, edit: true } })
+              }
+            >
+              <i className='fas fa-edit'></i>
+            </button>
+            <ReactTooltip id='edit' className='custom-tooltip' />{' '}
+            <button
+              data-tip='Delete'
+              data-for='del'
+              data-type='error'
+              className='btn btn-danger'
+              onClick={handleDelete}
+            >
+              <i className='fas fa-trash'></i>
+            </button>
+            <ReactTooltip id='del' className='custom-tooltip' />
+          </span>
+        )}
       </div>
 
       <p className='text-muted small mb-4'>
@@ -59,7 +109,9 @@ const ViewSinglePost = () => {
         on {formatDate(post.createdDate)}
       </p>
 
-      <div className='body-content'>{post.body}</div>
+      <div className='body-content'>
+        <ReactMarkdown children={post.body} />
+      </div>
     </Page>
   )
 }
