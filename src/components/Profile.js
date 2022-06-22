@@ -1,12 +1,14 @@
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, NavLink, Routes, Route } from 'react-router-dom'
 import { AppContext } from '../App'
+import { startFollowing } from '../utils/startFollowing'
+import { stopFollowing } from '../utils/stopFollowing'
 import Page from './Page'
 import ProfilePosts from './ProfilePosts'
 
 const Profile = () => {
-  const { state } = useContext(AppContext)
+  const { state, dispatch } = useContext(AppContext)
   const { username } = useParams()
   const [profileData, setProfileData] = useState({
     profileUsername: '...',
@@ -14,6 +16,7 @@ const Profile = () => {
     isFollowing: false,
     counts: { postCount: 0, followerCount: 0, followingCount: 0 },
   })
+  const [loading, setLoading] = useState(false)
   useEffect(() => {
     async function fetchData() {
       try {
@@ -26,28 +29,44 @@ const Profile = () => {
       }
     }
     fetchData()
-  }, [])
+  }, [username])
+
+  useEffect(() => {
+    if (!loading) return
+    if (!profileData.isFollowing) {
+      startFollowing(profileData, state.user.token, setProfileData)
+      dispatch({ type: 'startFollowing', payload: profileData.profileUsername })
+    } else if (profileData.isFollowing) {
+      stopFollowing(profileData, state.user.token, setProfileData)
+      dispatch({ type: 'stopFollowing', payload: profileData.profileUsername })
+    }
+    setLoading(false)
+  }, [loading])
+
+  const handleClick = () => {
+    setLoading(true)
+    console.log('loading')
+  }
+  console.log(state.followingUsers)
   return (
     <Page title='Profile Page'>
       <h2>
         <img className='avatar-small' src={profileData.profileAvatar} />{' '}
-        {profileData.profileUsername}
-        <button className='btn btn-primary btn-sm ml-2'>
-          Follow <i className='fas fa-user-plus'></i>
-        </button>
+        {profileData.profileUsername}{' '}
+        {state.loggedIn && state.user.username != username && (
+          <button
+            onClick={handleClick}
+            className={`btn btn-${
+              !profileData.isFollowing ? 'primary' : 'danger'
+            } btn-sm ml-2`}
+            disabled={loading}
+          >
+            {!profileData.isFollowing ? 'Follow' : 'Stop Following'}{' '}
+            <i className='fas fa-user-plus'></i>
+          </button>
+        )}
       </h2>
 
-      <div className='profile-nav nav nav-tabs pt-2 mb-4'>
-        <a href='#' className='active nav-item nav-link'>
-          Posts: {profileData.counts.postCount}
-        </a>
-        <a href='#' className='nav-item nav-link'>
-          Followers: {profileData.counts.followerCount}
-        </a>
-        <a href='#' className='nav-item nav-link'>
-          Following: {profileData.counts.followingCount}
-        </a>
-      </div>
       <ProfilePosts username={username} />
     </Page>
   )

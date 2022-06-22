@@ -1,9 +1,14 @@
-import React, { useContext, useEffect, useState } from 'react'
+import axios from 'axios'
+import React, { Suspense, useContext, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { AppContext } from '../App'
 import { debounce } from '../utils/debounce'
+import { formatDate } from '../utils/formatDate'
+import LoadingDots from './LoadingDots'
 
 const Search = () => {
   const [searchTerm, setSearchTerm] = useState('')
+  const [searchResult, setSearchResult] = useState([])
   const { dispatch } = useContext(AppContext)
   useEffect(() => {
     document.addEventListener('keyup', handleKeyPress)
@@ -13,7 +18,21 @@ const Search = () => {
     }
   }, [])
   useEffect(() => {
-    console.log(searchTerm)
+    const ct = axios.CancelToken.source()
+    try {
+      if (searchTerm === '') return
+      ;(async () => {
+        const response = await axios.post(
+          '/search',
+          { searchTerm: searchTerm },
+          { cancelToken: ct.token }
+        )
+        setSearchResult(response.data)
+      })()
+    } catch (err) {
+      console.log(err.message)
+    }
+    return () => ct.cancel()
   }, [searchTerm])
   function handleKeyPress(e) {
     if (e.code === 'Escape') {
@@ -21,7 +40,7 @@ const Search = () => {
     }
   }
   function handleChange(e) {
-    setSearchTerm(e.target.value)
+    setSearchTerm(e.target.value.trim())
   }
   const dbChange = debounce(handleChange)
   return (
@@ -53,35 +72,30 @@ const Search = () => {
         <div className='container container--narrow py-3'>
           <div className='live-search-results live-search-results--visible'>
             <div className='list-group shadow-sm'>
-              <div className='list-group-item active'>
-                <strong>Search Results</strong> (3 items found)
-              </div>
-              <a href='#' className='list-group-item list-group-item-action'>
-                <img
-                  className='avatar-tiny'
-                  src='https://gravatar.com/avatar/b9408a09298632b5151200f3449434ef?s=128'
-                />{' '}
-                <strong>Example Post #1</strong>
-                <span className='text-muted small'>by brad on 2/10/2020 </span>
-              </a>
-              <a href='#' className='list-group-item list-group-item-action'>
-                <img
-                  className='avatar-tiny'
-                  src='https://gravatar.com/avatar/b9216295c1e3931655bae6574ac0e4c2?s=128'
-                />{' '}
-                <strong>Example Post #2</strong>
-                <span className='text-muted small'>
-                  by barksalot on 2/10/2020{' '}
-                </span>
-              </a>
-              <a href='#' className='list-group-item list-group-item-action'>
-                <img
-                  className='avatar-tiny'
-                  src='https://gravatar.com/avatar/b9408a09298632b5151200f3449434ef?s=128'
-                />{' '}
-                <strong>Example Post #3</strong>
-                <span className='text-muted small'>by brad on 2/10/2020 </span>
-              </a>
+              {searchResult.length > 1 && (
+                <div className='list-group-item active'>
+                  <strong>Search Results</strong> ({searchResult.length} item
+                  {searchResult.length > 1 && 's'} found)
+                </div>
+              )}
+
+              <Suspense fallback={<LoadingDots />}>
+                {searchResult.map((item) => (
+                  <Link
+                    to={`/posts/${item._id}`}
+                    key={item._id}
+                    className='list-group-item list-group-item-action'
+                    onClick={() => dispatch({ type: 'closeSearch' })}
+                  >
+                    <img className='avatar-tiny' src={item.author.avatar} />{' '}
+                    <strong>{item.title}</strong>{' '}
+                    <span className='text-muted small'>
+                      by {item.author.username} on{' '}
+                      {formatDate(item.createdDate)}{' '}
+                    </span>
+                  </Link>
+                ))}
+              </Suspense>
             </div>
           </div>
         </div>

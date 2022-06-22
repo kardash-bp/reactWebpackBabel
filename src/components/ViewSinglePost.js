@@ -33,7 +33,7 @@ const ViewSinglePost = () => {
     return () => {
       ct.cancel()
     }
-  }, [])
+  }, [postId])
   if (isLoading) {
     return (
       <Page title='...'>

@@ -13,6 +13,8 @@ const initialState = {
     username: localStorage.getItem('complexAppUsername'),
     avatar: localStorage.getItem('complexAppAvatar'),
   },
+  followingUsers: [],
+
   flashMessages: [],
   isSearchOpen: false,
 }
@@ -31,7 +33,16 @@ const reducer = (state, action) => {
       return { ...state, isSearchOpen: true }
     case 'closeSearch':
       return { ...state, isSearchOpen: false }
-
+    case 'startFollowing':
+      const startArr = [...state.followingUsers, action.payload]
+      console.log(action.payload)
+      return { ...state, followingUsers: [...startArr] }
+    case 'stopFollowing':
+      console.log(state.followingUsers)
+      const stopArr = state.followingUsers.filter(
+        (name) => name !== action.payload
+      )
+      return { ...state, followingUsers: [...stopArr] }
     default:
       return state
   }

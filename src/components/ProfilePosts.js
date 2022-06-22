@@ -17,7 +17,7 @@ const ProfilePosts = ({ username }) => {
         console.log(err.message)
       }
     })()
-  }, [])
+  }, [username])
   if (isLoading) return <LoadingDots />
 
   return (

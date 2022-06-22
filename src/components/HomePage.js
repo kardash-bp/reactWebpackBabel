@@ -1,6 +1,5 @@
 import Axios from 'axios'
 import React, { useState, useContext } from 'react'
-import { useOutletContext } from 'react-router-dom'
 import { AppContext } from '../App'
 import Page from './Page'
 
@@ -11,6 +10,7 @@ function HomeGuest() {
   const { state } = useContext(AppContext)
   async function handleSubmit(e) {
     e.preventDefault()
+    console.log(password)
     try {
       await Axios.post('/register', {
         username,
@@ -19,7 +19,7 @@ function HomeGuest() {
       })
       console.log('User was successfully created.')
     } catch (err) {
-      console.log(err.message)
+      console.error(err.message)
     }
   }
   return !state.loggedIn ? (
