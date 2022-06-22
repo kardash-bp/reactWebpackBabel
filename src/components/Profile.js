@@ -1,10 +1,11 @@
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
-import { useParams, NavLink, Routes, Route } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { AppContext } from '../App'
 import { startFollowing } from '../utils/startFollowing'
 import { stopFollowing } from '../utils/stopFollowing'
 import Page from './Page'
+import ProfileButtons from './ProfileButtons'
 import ProfilePosts from './ProfilePosts'
 
 const Profile = () => {
@@ -23,6 +24,7 @@ const Profile = () => {
         const response = await axios.post(`/profile/${username}`, {
           token: state.user.token,
         })
+        console.log(response.data)
         setProfileData(response.data)
       } catch (err) {
         console.log(err.message)
@@ -47,7 +49,6 @@ const Profile = () => {
     setLoading(true)
     console.log('loading')
   }
-  console.log(state.followingUsers)
   return (
     <Page title='Profile Page'>
       <h2>
@@ -66,7 +67,7 @@ const Profile = () => {
           </button>
         )}
       </h2>
-
+      <ProfileButtons username={username} counts={profileData.counts} />
       <ProfilePosts username={username} />
     </Page>
   )
