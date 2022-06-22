@@ -1,6 +1,8 @@
+import axios from 'axios'
 import Axios from 'axios'
-import React, { useState, useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { AppContext } from '../App'
+import HomePageFeed from './HomePageFeed'
 import Page from './Page'
 
 function HomeGuest() {
@@ -8,6 +10,7 @@ function HomeGuest() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const { state } = useContext(AppContext)
+
   async function handleSubmit(e) {
     e.preventDefault()
     console.log(password)
@@ -88,17 +91,7 @@ function HomeGuest() {
       </div>
     </Page>
   ) : (
-    <Page title='Your Feed'>
-      <h2 className='text-center'>
-        Hello <strong>{state.user.username}</strong>, your feed is empty.
-      </h2>
-      <p className='lead text-muted text-center'>
-        Your feed displays the latest posts from the people you follow. If you
-        don&rsquo;t have any friends to follow that&rsquo;s okay; you can use
-        the &ldquo;Search&rdquo; feature in the top menu bar to find content
-        written by people with similar interests and then follow them.
-      </p>
-    </Page>
+    <HomePageFeed />
   )
 }
 

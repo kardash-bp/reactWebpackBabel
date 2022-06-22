@@ -70,7 +70,7 @@ const App = () => {
       <Header />
       <Outlet />
       <CSSTransition
-        timeout={330}
+        timeout={500}
         in={state.isSearchOpen}
         classNames='search-overlay'
         unmountOnExit

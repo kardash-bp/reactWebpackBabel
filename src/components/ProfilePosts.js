@@ -3,38 +3,32 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { formatDate } from '../utils/formatDate'
 import LoadingDots from './LoadingDots'
+import Post from './Post'
 
 const ProfilePosts = ({ username }) => {
   const [isLoading, setIsLoading] = useState(true)
   const [posts, setPosts] = useState([])
   useEffect(() => {
+    const ct = axios.CancelToken.source()
     ;(async () => {
       try {
-        const response = await axios.get(`/profile/${username}/posts`)
+        const response = await axios.get(`/profile/${username}/posts`, {
+          cancelToken: ct.token,
+        })
         setPosts(response.data)
         setIsLoading(false)
       } catch (err) {
         console.log(err.message)
       }
     })()
+    return () => ct.cancel()
   }, [username])
   if (isLoading) return <LoadingDots />
 
   return (
     <div className='list-group'>
       {posts.map((post) => (
-        <Link
-          key={post._id}
-          to={`/posts/${post._id}`}
-          className='list-group-item list-group-item-action'
-        >
-          <img className='avatar-tiny' src={post.author.avatar} />{' '}
-          <strong>{post.title}</strong>
-          <span className='text-muted small'>
-            {' '}
-            on {formatDate(post.createdDate)}{' '}
-          </span>
-        </Link>
+        <Post author={true} post={post} key={post._id} />
       ))}
     </div>
   )

@@ -5,6 +5,7 @@ import { AppContext } from '../App'
 import { debounce } from '../utils/debounce'
 import { formatDate } from '../utils/formatDate'
 import LoadingDots from './LoadingDots'
+import Post from './Post'
 
 const Search = () => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -81,19 +82,11 @@ const Search = () => {
 
               <Suspense fallback={<LoadingDots />}>
                 {searchResult.map((item) => (
-                  <Link
-                    to={`/posts/${item._id}`}
+                  <Post
                     key={item._id}
-                    className='list-group-item list-group-item-action'
+                    post={item}
                     onClick={() => dispatch({ type: 'closeSearch' })}
-                  >
-                    <img className='avatar-tiny' src={item.author.avatar} />{' '}
-                    <strong>{item.title}</strong>{' '}
-                    <span className='text-muted small'>
-                      by {item.author.username} on{' '}
-                      {formatDate(item.createdDate)}{' '}
-                    </span>
-                  </Link>
+                  />
                 ))}
               </Suspense>
             </div>

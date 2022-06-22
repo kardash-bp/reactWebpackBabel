@@ -19,18 +19,23 @@ const Profile = () => {
   })
   const [loading, setLoading] = useState(false)
   useEffect(() => {
+    const ct = axios.CancelToken.source()
     async function fetchData() {
       try {
-        const response = await axios.post(`/profile/${username}`, {
-          token: state.user.token,
-        })
-        console.log(response.data)
+        const response = await axios.post(
+          `/profile/${username}`,
+          {
+            token: state.user.token,
+          },
+          { cancelToken: ct.token }
+        )
         setProfileData(response.data)
       } catch (err) {
         console.log(err.message)
       }
     }
     fetchData()
+    return () => ct.cancel()
   }, [username])
 
   useEffect(() => {
