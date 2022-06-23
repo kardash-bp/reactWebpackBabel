@@ -21,7 +21,6 @@ const HomePageFeed = () => {
           },
           { cancelToken: ct.token }
         )
-        console.log(response.data)
         setLoading(false)
         setFeed(response.data)
       } catch (err) {

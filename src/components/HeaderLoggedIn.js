@@ -27,12 +27,21 @@ const HeaderLoggedIn = () => {
       </a>
       <ReactTooltip place='bottom' id='search' className='custom-tooltip' />{' '}
       <span
+        onClick={() => dispatch({ type: 'toggleChat' })}
         data-for='chat'
         data-tip='Chat'
-        className='mr-2 header-chat-icon text-white'
+        className={`mr-2 header-chat-icon ${
+          state.unreadChat ? 'text-danger' : 'text-white'
+        }`}
       >
         <i className='fas fa-comment'></i>
-        <span className='chat-count-badge text-white'> </span>
+        {state.unreadChat ? (
+          <span className='chat-count-badge text-white'>
+            {state.unreadChat > 9 ? '9+' : state.unreadChat}
+          </span>
+        ) : (
+          ''
+        )}
       </span>
       <ReactTooltip place='bottom' id='chat' className='custom-tooltip' />{' '}
       <Link
