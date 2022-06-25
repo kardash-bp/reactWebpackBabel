@@ -20,8 +20,31 @@ const initialState = {
   isSearchOpen: false,
   isChatOpen: false,
   unreadChat: 0,
+  username: {
+    value: '',
+    hasErrors: false,
+    message: '',
+    isUnique: false,
+    checkCount: 0,
+  },
+  email: {
+    value: '',
+    hasErrors: false,
+    message: '',
+    isUnique: false,
+    checkCount: 0,
+  },
+  password: {
+    value: '',
+    hasErrors: false,
+    message: '',
+  },
+  submitCount: 0,
 }
 const reducer = (state, action) => {
+  let userInput
+  let emailInput
+  let passInput
   switch (action.type) {
     case 'login':
       return { ...state, loggedIn: true, user: action.payload }
@@ -50,6 +73,103 @@ const reducer = (state, action) => {
       return { ...state, unreadChat: state.unreadChat + 1 }
     case 'clearUnreadChat':
       return { ...state, unreadChat: 0 }
+    case 'usernameImmediately':
+      userInput = {
+        value: action.payload,
+        hasErrors: false,
+        message: '',
+        isUnique: state.username.isUnique,
+        checkCount: 0,
+      }
+
+      if (userInput.value.length > 30) {
+        userInput.hasErrors = true
+        userInput.message = 'Username cannot exceed 30 characters.'
+      }
+      if (userInput.value && !/^([a-zA-Z0-9]+)$/.test(userInput.value)) {
+        userInput.hasErrors = true
+        userInput.message = 'Username can only contain letters and numbers.'
+      }
+      return { ...state, username: userInput }
+    case 'usernameAfterDelay':
+      userInput = { ...state.username }
+      if (userInput.value.length < 3) {
+        userInput.hasErrors = true
+        userInput.message = 'Username must be at least 3 characters.'
+      }
+      if (!userInput.hasErrors && !action.submit) {
+        userInput.checkCount++
+      }
+      return { ...state, username: userInput }
+    case 'usernameUniqueResults':
+      userInput = { ...state.username }
+      if (action.payload) {
+        userInput.hasErrors = true
+        userInput.isUnique = false
+        userInput.message = 'That username is already taken.'
+      } else {
+        userInput.isUnique = true
+      }
+      return { ...state, username: userInput }
+    case 'emailImmediately':
+      emailInput = {
+        value: action.payload,
+        hasErrors: false,
+        message: '',
+        isUnique: state.email.isUnique,
+        checkCount: 0,
+      }
+
+      return { ...state, email: emailInput }
+    case 'emailAfterDelay':
+      emailInput = { ...state.email }
+      const eFormat =
+        /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
+      if (!emailInput.value.match(eFormat)) {
+        emailInput.hasErrors = true
+        emailInput.message = 'You must provide a valid email address.'
+      }
+      if (!emailInput.hasErrors && !action.submit) {
+        emailInput.checkCount++
+      }
+
+      return { ...state, email: emailInput }
+    case 'emailUniqueResults':
+      emailInput = { ...state.email }
+      if (action.payload) {
+        emailInput.hasErrors = true
+        emailInput.isUnique = false
+        emailInput.message = 'That email is already being used.'
+      } else {
+        emailInput.isUnique = true
+      }
+
+      return { ...state, email: emailInput }
+    case 'passwordImmediately':
+      passInput = {
+        value: action.payload,
+        hasErrors: false,
+        message: '',
+      }
+      return { ...state, password: passInput }
+    case 'passwordAfterDelay':
+      passInput = { ...state.password }
+      if (passInput.value.length < 12 || passInput.value.length > 50) {
+        passInput.hasErrors = true
+        passInput.message =
+          'Password must be between 12 and 30 characters long.'
+      }
+      return { ...state, password: passInput }
+    case 'submitForm':
+      if (
+        !state.username.hasErrors &&
+        state.username.isUnique &&
+        !state.email.hasErrors &&
+        state.email.isUnique
+      ) {
+        state.submitCount++
+      }
+      return state
     default:
       return state
   }
@@ -71,6 +191,7 @@ const App = () => {
       localStorage.removeItem('complexAppAvatar')
     }
   }, [state.loggedIn])
+
   return (
     <AppContext.Provider value={value}>
       <FlashMsg />

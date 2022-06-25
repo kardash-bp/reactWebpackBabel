@@ -30,6 +30,7 @@ const HomePageFeed = () => {
     fetchData()
     return () => ct.cancel()
   }, [])
+  // console.log(feed)
   if (loading) {
     return <LoadingDots />
   }

@@ -52,7 +52,6 @@ const Profile = () => {
 
   const handleClick = () => {
     setLoading(true)
-    console.log('loading')
   }
   return (
     <Page title='Profile Page'>

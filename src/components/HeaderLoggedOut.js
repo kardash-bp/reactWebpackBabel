@@ -22,6 +22,10 @@ const HeaderLoggedOut = () => {
         })
       } else {
         console.log('Incorrect data')
+        dispatch({
+          type: 'addFlashMsg',
+          payload: 'Invalid credentials.',
+        })
       }
     } catch (err) {
       console.log(err.message)

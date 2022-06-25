@@ -1,9 +1,7 @@
 import axios from 'axios'
 import React, { Suspense, useContext, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { AppContext } from '../App'
 import { debounce } from '../utils/debounce'
-import { formatDate } from '../utils/formatDate'
 import LoadingDots from './LoadingDots'
 import Post from './Post'
 
@@ -19,20 +17,25 @@ const Search = () => {
     }
   }, [])
   useEffect(() => {
+    if (searchTerm === '') return
     const ct = axios.CancelToken.source()
     try {
-      if (searchTerm === '') return
-      ;(async () => {
+      async function getData() {
         const response = await axios.post(
           '/search',
           { searchTerm: searchTerm },
           { cancelToken: ct.token }
         )
+        if (!response.data) {
+          return 'Error'
+        }
         setSearchResult(response.data)
-      })()
+      }
+      getData()
     } catch (err) {
       console.log(err.message)
     }
+
     return () => ct.cancel()
   }, [searchTerm])
   function handleKeyPress(e) {
@@ -44,6 +47,7 @@ const Search = () => {
     setSearchTerm(e.target.value.trim())
   }
   const dbChange = debounce(handleChange)
+
   return (
     <div className='search-overlay'>
       <div className='search-overlay-top shadow-sm'>
@@ -73,7 +77,7 @@ const Search = () => {
         <div className='container container--narrow py-3'>
           <div className='live-search-results live-search-results--visible'>
             <div className='list-group shadow-sm'>
-              {searchResult.length > 1 && (
+              {searchResult.length > 0 && (
                 <div className='list-group-item active'>
                   <strong>Search Results</strong> ({searchResult.length} item
                   {searchResult.length > 1 && 's'} found)
