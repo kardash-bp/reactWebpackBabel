@@ -12,7 +12,6 @@ const ProfileFollowing = () => {
     ;(async () => {
       try {
         const response = await axios.get(`/profile/${username}/following`)
-        console.log(response.data)
         setPosts(response.data)
         setIsLoading(false)
       } catch (err) {

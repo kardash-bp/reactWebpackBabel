@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import io from 'socket.io-client'
-const socket = io('http://localhost:8080')
 const Chat = ({ isOpen, toggle, username, avatar, token, dispatch }) => {
   const [chatText, setChatText] = useState('')
   const [chatMsg, setChatMsg] = useState([])
   const chatInput = useRef(null)
   const chatLog = useRef(null)
+  const socket = useRef(null)
   useEffect(() => {
     if (isOpen) {
       chatInput.current.focus()
@@ -14,9 +14,11 @@ const Chat = ({ isOpen, toggle, username, avatar, token, dispatch }) => {
     }
   }, [isOpen])
   useEffect(() => {
-    socket.on('chatFromServer', (message) => {
+    socket.current = io('http://localhost:8080')
+    socket.current.on('chatFromServer', (message) => {
       setChatMsg((prev) => [...prev, message])
     })
+    return () => socket.current.disconnect()
   }, [])
   useEffect(() => {
     // scroll to last message
@@ -32,7 +34,7 @@ const Chat = ({ isOpen, toggle, username, avatar, token, dispatch }) => {
   const handleSubmit = (e) => {
     e.preventDefault()
     // send msg to chat server
-    socket.emit('chatFromBrowser', { message: chatText, token: token })
+    socket.current.emit('chatFromBrowser', { message: chatText, token: token })
     setChatMsg((prev) => [
       ...prev,
       { message: chatText, username: username, avatar: avatar },

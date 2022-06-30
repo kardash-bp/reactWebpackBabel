@@ -1,11 +1,19 @@
-import React, { useEffect, useReducer, createContext, useMemo } from 'react'
+import axios from 'axios'
+import React, {
+  useEffect,
+  useReducer,
+  createContext,
+  useMemo,
+  Suspense,
+} from 'react'
 import { Outlet } from 'react-router'
 import { CSSTransition } from 'react-transition-group'
 import Chat from './components/Chat'
 import FlashMsg from './components/FlashMsg'
 import Footer from './components/Footer'
 import Header from './components/Header'
-import Search from './components/Search'
+import LoadingDots from './components/LoadingDots'
+const Search = React.lazy(() => import('./components/Search'))
 
 const initialState = {
   loggedIn: Boolean(localStorage.getItem('complexAppToken')),
@@ -191,7 +199,33 @@ const App = () => {
       localStorage.removeItem('complexAppAvatar')
     }
   }, [state.loggedIn])
+  // if token has expired
+  useEffect(() => {
+    if (!state.loggedIn) return
+    const ct = axios.CancelToken.source()
+    try {
+      async function getData() {
+        const response = await axios.post(
+          '/checkToken',
+          { token: state.user.token },
+          { cancelToken: ct.token }
+        )
 
+        if (!response.data) {
+          dispatch({ type: 'logout' })
+          dispatch({
+            type: 'addFlashMsg',
+            payload: 'Your session has expired. Please log in again.',
+          })
+        }
+      }
+      getData()
+    } catch (err) {
+      console.log(err.message)
+    }
+
+    return () => ct.cancel()
+  }, [])
   return (
     <AppContext.Provider value={value}>
       <FlashMsg />
@@ -203,16 +237,23 @@ const App = () => {
         classNames='search-overlay'
         unmountOnExit
       >
-        <Search />
+        <div className='search-overlay'>
+          <Suspense fallback={<LoadingDots />}>
+            {' '}
+            <Search />
+          </Suspense>
+        </div>
       </CSSTransition>
-      <Chat
-        isOpen={state.isChatOpen}
-        toggle={() => dispatch({ type: 'toggleChat' })}
-        username={state.user.username}
-        avatar={state.user.avatar}
-        token={state.user.token}
-        dispatch={dispatch}
-      />
+      {state.loggedIn && (
+        <Chat
+          isOpen={state.isChatOpen}
+          toggle={() => dispatch({ type: 'toggleChat' })}
+          username={state.user.username}
+          avatar={state.user.avatar}
+          token={state.user.token}
+          dispatch={dispatch}
+        />
+      )}
       <Footer />
     </AppContext.Provider>
   )
